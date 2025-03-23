@@ -43,9 +43,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                <a class="nav-link" href="index.html">Home</a>
                 <a class="nav-link" href="analysis.html">Analysis</a>
-                <a class="nav-link" href="eviction.html">Eviction</a>
+                <a class="nav-link active" aria-current="page" href="#">Eviction</a>
             </div>
         </div>
     </div>
@@ -56,8 +56,8 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <div class="container">
-            <h1 class="display-3">Red Hat Data Grid Sizing Tool</h1>
-            <p class="lead">Simplify your life. Save time. Do the right things. Avoid OOM Errors!</p>
+            <h1 class="display-3">Eviction Strategy</h1>
+            <p class="lead">Based on previous setup here you can calculate the <b>MAX_COUNT</b> value for each cache</p>
             <p id="the_response"></p>
             <br><br>
         </div>
@@ -66,17 +66,13 @@
     <div class="container" id="current_report" style="display:none">
         <div class="alert alert-danger" id="formNotComplete" role="alert" style="display:none;"></div>
         <br>
-        <p class="text-end">This is your latest calculation. To reset You can <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#confirmStartOverModal">Start Over</button></p>
         <table class="table table-condensed table-hover" id="tbl_caches">
             <thead>
-                <tr class="tb_header"><th>Cache name</th><th class="text-end">Object size (B)</th><th class="text-end">Key size (B)</th><th class="text-end">Number of entries</th><th class="text-end">Owners</th><th>&nbsp;</th></tr>
+                <tr class="tb_header"><th>Cache name</th><th class="text-end">Number of Entries</th><th class="text-end">Input Max Count (ML)</th><th class="text-end">Data Set Size</th><th class="text-end">days in memory</th></tr>
             </thead>
             <tbody id="cachesTableBody">
             </tbody>
         </table>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cacheForm">
-            Add Cache
-        </button>
     </div>
 
     <div class="container">
@@ -87,76 +83,8 @@
 
 </main>
 
-<!-- Modal form to collect data about each single Cache -->
-<div class="modal fade" id="cacheForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Add Cache to calculation</h5>
-            </div>
 
-            <div class="modal-body">
-                <p>
-                    The calculation is based on the estimated daily entries. Then the analysis will
-                    work on adjustments of three parameters: <b>number of days</b> of retention,
-                    dedicated <b>RAM</b> of the container and number of Infinispan <b>instances</b>
-                </p>
-                <div class="mb-3">
-                    <label for="cacheName" class="form-label">Cache name</label>
-                    <input type="text" class="form-control" id="cacheName">
-                </div>
-                <div class="mb-3">
-                    <label for="entrySize" class="form-label">Entry size (B)</label>
-                    <input type="text" class="form-control" id="entrySize">
-                </div>
-                <div class="mb-3">
-                    <label for="keySize" class="form-label">Key size (B)</label>
-                    <input type="text" class="form-control" id="keySize">
-                </div>
-                <div class="mb-3">
-                    <label for="entries" class="form-label">Estimated number of daily entries</label>
-                    <input type="text" class="form-control" id="entries">
-                </div>
-                <div class="mb-3">
-                    <label for="owners" class="form-label">Owners (number of replications)</label>
-                    <select id="owners" class="form-select" aria-label="Default select example">
-                        <option value="2" selected>2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button id="saveCacheButton" type="button" class="btn btn-outline-primary">Save</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- Modal form to confirm the reset of all trips a start a new report -->
-<div id="confirmStartOverModal" class="modal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Start a NEW Size Analysis</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Please Confirm you want to reset the calculation</p>
-                <p><b>WARNING!</b><br>
-                If you start a new Size Analysis all the data currently saved will be lost.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button id="startOverButton" type="button" class="btn btn-primary">Start New Analysis</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- jQuery first, then Bootstrap JS -->
 <script src="js/jquery-3.7.1.min.js"></script>
@@ -165,7 +93,7 @@
 <script type="text/javascript">
 
     $(document).ready(function(){
-        displayCaches();
+        displayEviction();
 
         $('#saveCacheButton').click(function(){
             $("#cacheForm").modal('hide');
@@ -208,7 +136,6 @@
             }
 
             cache.owners = parseInt($('#owners').val());
-            cache.maxcount = 0;
 
             var caches = JSON.parse(localStorage.getItem("dgstCaches") || "[]");
             addCacheToTable(cache, caches.length);
