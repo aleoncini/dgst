@@ -68,11 +68,39 @@
         <br>
         <table class="table table-condensed table-hover" id="tbl_caches">
             <thead>
-                <tr class="tb_header"><th>Cache name</th><th class="text-end">Number of Daily Entries</th><th class="text-end"></th><th class="text-end">Input Max Count (ML)</th><th class="text-end">Data Set Size</th><th class="text-end">days in memory</th></tr>
+                <tr class="tb_header"><th>Cache name</th><th class="text-end">Number of Daily Entries</th><th class="text-end">Input Max Count</th><th class="text-end">Data Set Size (bytes)</th><th class="text-end">days in memory</th></tr>
             </thead>
             <tbody id="cachesTableBody">
             </tbody>
         </table>
+
+        <div class="container" id="current_analysis">
+
+            <br><br>
+
+            <form class="row g-3">
+                <div class="col-md-6">
+                    <p>total memory required for the cluster:</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-end" id="totalMemorySize"></p>
+                </div>
+                <div class="col-md-6">
+                    <p>memory required for each single node of the cluster:</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-end" id="containerMemorySize"></p>
+                </div>
+                <div class="col-md-6">
+                    <p>Cluster effectiveness</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-end" id="status"></p>
+                </div>
+            </form>
+
+        </div>
+
     </div>
 
     <div class="container">
@@ -95,66 +123,8 @@
     $(document).ready(function(){
         displayEviction();
 
-        $('#saveCacheButton').click(function(){
-            $("#cacheForm").modal('hide');
-            var cache = {};
-
-            if ($('#cacheName').val().length == 0) {
-                setAlert('Please insert a name for this cache');
-                return;
-            }
-            cache.name = $('#cacheName').val();
-
-            if ($('#entrySize').val().length == 0) {
-                setAlert('Please insert the estimated size for each entry of the cache');
-                return;
-            }
-            cache.entrySize = parseInt($('#entrySize').val());
-            if (isNaN(cache.entrySize)) {
-                setAlert('Please insert an integer value for the size of entry');
-                return;
-            }
-
-            if ($('#keySize').val().length == 0) {
-                setAlert('Please insert the estimated size of the key of entries');
-                return;
-            }
-            cache.keySize = parseInt($('#keySize').val());
-            if (isNaN(cache.keySize)) {
-                setAlert('Please insert an integer value for the size of key entry');
-                return;
-            }
-
-            if ($('#entries').val().length == 0) {
-                setAlert('Please insert the estimated number of entries this cache will have');
-                return;
-            }
-            cache.entries = parseInt($('#entries').val());
-            if (isNaN(cache.entries)) {
-                setAlert('Please insert an integer value for the number of entries');
-                return;
-            }
-
-            cache.owners = parseInt($('#owners').val());
-
-            var caches = JSON.parse(localStorage.getItem("dgstCaches") || "[]");
-            addCacheToTable(cache, caches.length);
-            caches.push(cache);
-            setDataSetSize(caches);
-            localStorage.setItem('dgstCaches', JSON.stringify(caches));
-        });
-
-        $(document).on("click", ".delete_cache", function () {
-            var caches = JSON.parse(localStorage.getItem("dgstCaches"));
-            caches.splice(this.dataset.id, 1);
-            localStorage.setItem('dgstCaches', JSON.stringify(caches));
-            setDataSetSize(caches);
-            $(this).parent().remove();
-        });
-
-        $('#startOverButton').click(function(){
-            $("#confirmStartOverModal").modal('hide');
-            resetReport();
+        $(".input_max_count").on("blur", function(){
+            calculateEvictions(this.dataset.id, this.value);
         });
 
     });

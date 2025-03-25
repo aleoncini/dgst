@@ -1,5 +1,6 @@
 var STORE_ORIGIN = window.location.origin;
 var nFormat = new Intl.NumberFormat(undefined, {minimumFractionDigits: 0});
+var dFormat = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2});
 
 function displayCaches() {
     $('#current_report').hide();
@@ -54,14 +55,13 @@ function analyse() {
     $("#dataSetSize").html(nFormat.format(singleDaySize));
 
     var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
-
     $("#days").val(days);
 
     var instances = JSON.parse(localStorage.getItem("dgstNumberOfInstances") || "3");
-    $("#instances").html(nFormat.format(instances));
+    $("#instances").val(instances);
 
     var memory = JSON.parse(localStorage.getItem("dgstContainerMemory") || "2");
-    $("div.ram select").val(memory);
+    $("#ram").val(memory);
 
     var clSize = singleDaySize * days;
     $("#clusterSize").html(nFormat.format(clSize));
@@ -125,17 +125,61 @@ function addCacheCountToTable(cache, ndx) {
     var rowContent = '<tr>';
     rowContent += '<td>' + cache.name + '</td>';
     rowContent += '<td class=\"text-end\">' + nFormat.format(cache.entries) + '</td>';
-    rowContent += '<td class=\"text-end\"><select class=\"form-select form-select-sm\" id=\"misure\"><option value=\"1073741824\">GB</option><option value=\"1048576\">MB</option><option value=\"1024\">KB</option><option value=\"1\">B</option></select></td>';
     //rowContent += '<td class=\"text-end\"><div class=\"input-group input-group-sm\"><span class=\"input-group-text\">Size in Mil.</span><input type=\"text\" class=\"form-control input_max_count\" value=\"' + cache.maxcount + '\"></div></td>';
-    rowContent += '<td class=\"text-end\"><input type=\"text\" class=\"form-control input_max_count input-sm\" value=\"' + cache.maxcount + '\"></td>';
+    rowContent += '<td class=\"text-end\"><input data-id=\"' + cache.name + '\" type=\"text\" class=\"form-control input_max_count text-end\" value=\"' + cache.maxcount + '\"></td>';
 
-    var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
-    var dss = nFormat.format((cache.entrySize + cache.keySize) * cache.entries * days * (cache.owners + 1));
-    rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + dss + '</td>';
-
-    var calculatedDays = cache.maxcount / cache.entries;
-    rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">' + calculatedDays + '</td>';
+    if(cache.maxcount == 0){
+        var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
+        var dss = nFormat.format((cache.entrySize + cache.keySize) * cache.entries * days * (cache.owners + 1));
+        rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + dss + '</td>';
+        rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">0</td>';
+    } else {
+        var dss = nFormat.format((cache.entrySize + cache.keySize) * cache.maxcount * (cache.owners + 1));
+        rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + dss + '</td>';
+        rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">0</td>';
+        var daysInMemory = cache.maxcount / cache.entries;
+    }
     rowContent += '</tr>';
     $('#tbl_caches  tbody').append(rowContent);
+    calculateClusterSizeByMaxCount();
 };
 
+function calculateEvictions(cacheName, maxcount) {
+    var caches = JSON.parse(localStorage.getItem("dgstCaches") || "[]");
+    $.each(caches, function (index, cache) {
+        if(cache.name == cacheName){
+            var dss = nFormat.format((cache.entrySize + cache.keySize) * maxcount * (cache.owners + 1));
+            $("#dss_" + cache.name).html(dss);
+            cache.maxcount = maxcount;
+            var dim = dFormat.format(maxcount / cache.entries);
+            $("#dim_" + cache.name).html(dim);
+        }
+    });
+    localStorage.setItem('dgstCaches', JSON.stringify(caches));
+};
+
+function calculateClusterSizeByMaxCount() {
+    var caches = JSON.parse(localStorage.getItem("dgstCaches") || "[]");
+    var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
+    var instances = localStorage.getItem('dgstNumberOfInstances') || 3;
+    var containerMemory = localStorage.getItem('dgstContainerMemory') || 2;
+    var clusterSize = 0;
+    $.each(caches, function (index, cache) {
+        if(cache.maxcount == 0){
+            clusterSize += (cache.entrySize + cache.keySize) * cache.entries * days * (cache.owners + 1);
+        } else {
+            clusterSize += (cache.entrySize + cache.keySize) * cache.maxcount * (cache.owners + 1);
+        }
+    });
+    var containerSize = parseInt(containerMemory) * 1024 * 1024 * 1024;
+    $("#totalMemorySize").html(nFormat.format(clusterSize));
+    var containerMemoryRequested = clusterSize / instances;
+    $("#containerMemorySize").html(nFormat.format(containerMemoryRequested));
+    var diff = containerSize - containerMemoryRequested;
+    if(diff > 0){
+        $("#status").html('<p style=\"color: #45b39d\">Healthy. Good setup</p>');
+    } else {
+        $("#status").html('<p style=\"color: #ff7b25\">Risk of buffer overflow !!</p>');
+    }
+
+};
