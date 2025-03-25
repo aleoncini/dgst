@@ -108,8 +108,8 @@
                 <p>Container allocation memory</p>
             </div>
             <div class="col-md-2">
-                <select id="ram" class="form-select text-end analysis_input" onchange="analyse();">
-                    <option selected value="2">2GB</option>
+                <select id="ram" class="form-select text-end analysis_input selectpicker" onchange="analyseChange();">
+                    <option value="2">2GB</option>
                     <option value="4">4GB</option>
                     <option value="6">6GB</option>
                     <option value="8">8GB</option>
@@ -125,7 +125,7 @@
             </div>
 
             <div class="col-md-6">
-                <p>memory required by each instance</p>
+                <p>memory required by each instance <span style="color: #ff7b25;">(overload)</span></p>
             </div>
             <div class="col-md-2">
                 <p class="text-end" id="inst_mem"></p>
@@ -155,66 +155,6 @@
 
         $(document).on('input propertychange', '.analysis_input', function(){
             analyseChange();
-        });
-
-        $('#saveCacheButton').click(function(){
-            $("#cacheForm").modal('hide');
-            var cache = {};
-
-            if ($('#cacheName').val().length == 0) {
-                setAlert('Please insert a name for this cache');
-                return;
-            }
-            cache.name = $('#cacheName').val();
-
-            if ($('#entrySize').val().length == 0) {
-                setAlert('Please insert the estimated size for each entry of the cache');
-                return;
-            }
-            cache.entrySize = parseInt($('#entrySize').val());
-            if (isNaN(cache.entrySize)) {
-                setAlert('Please insert an integer value for the size of entry');
-                return;
-            }
-
-            if ($('#keySize').val().length == 0) {
-                setAlert('Please insert the estimated size of the key of entries');
-                return;
-            }
-            cache.keySize = parseInt($('#keySize').val());
-            if (isNaN(cache.keySize)) {
-                setAlert('Please insert an integer value for the size of key entry');
-                return;
-            }
-
-            if ($('#entries').val().length == 0) {
-                setAlert('Please insert the estimated number of entries this cache will have');
-                return;
-            }
-            cache.entries = parseInt($('#entries').val());
-            if (isNaN(cache.entries)) {
-                setAlert('Please insert an integer value for the number of entries');
-                return;
-            }
-
-            cache.owners = parseInt($('#owners').val());
-
-            var caches = JSON.parse(localStorage.getItem("dgstCaches") || "[]");
-            addCacheToTable(cache, caches.length);
-            caches.push(cache);
-            localStorage.setItem('dgstCaches', JSON.stringify(caches));
-        });
-
-        $(document).on("click", ".delete_cache", function () {
-            var caches = JSON.parse(localStorage.getItem("dgstCaches"));
-            caches.splice(this.dataset.id, 1);
-            localStorage.setItem('dgstCaches', JSON.stringify(caches));
-            $(this).parent().remove();
-        });
-
-        $('#startOverButton').click(function(){
-            $("#confirmStartOverModal").modal('hide');
-            resetReport();
         });
 
     });

@@ -51,17 +51,24 @@ function setDataSetSize(caches) {
 
 function analyse() {
     var singleDaySize = JSON.parse(localStorage.getItem("dgstDataSetSize") || "0");
-    var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
-    var instances = JSON.parse(localStorage.getItem("dgstNumberOfInstances") || "3");
-    var memory = JSON.parse(localStorage.getItem("dgstContainerMemory") || "2");
     $("#dataSetSize").html(nFormat.format(singleDaySize));
-    $("#days").val(nFormat.format(days));
+
+    var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
+
+    $("#days").val(days);
+
+    var instances = JSON.parse(localStorage.getItem("dgstNumberOfInstances") || "3");
+    $("#instances").html(nFormat.format(instances));
+
+    var memory = JSON.parse(localStorage.getItem("dgstContainerMemory") || "2");
+    $("div.ram select").val(memory);
+
     var clSize = singleDaySize * days;
     $("#clusterSize").html(nFormat.format(clSize));
-    $("#instances").html(nFormat.format(instances));
+
     var instMemory = clSize / instances;
     $("#inst_mem").html(nFormat.format(instMemory));
-    $("div.ram select").val(memory).change();
+
     var diff = (instMemory * 2) - parseInt($('#ram').val()) * 1024 * 1024 *1024;
     if(diff > 0){
         $("#overload").html('<p style=\"color: #ff7b25\">' + nFormat.format(diff) + '</p>');
@@ -71,20 +78,32 @@ function analyse() {
 };
 
 function analyseChange() {
-    var singleDaySize = JSON.parse(localStorage.getItem("dgstDataSetSize") || "0");
     var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
-    if( $("#days").val() != days){
-        days = $("#days").val();
-        localStorage.setItem('dgstNumberOfDays', JSON.stringify($("#days").val()));
-        $("#clusterSize").html(nFormat.format(singleDaySize * days));
-        $("#inst_mem").html(nFormat.format((singleDaySize * days) / $("#instances").val()));
-        var diff = ((singleDaySize * days) / $("#instances").val() * 2) - parseInt($('#ram').val()) * 1024 * 1024 *1024;
-        if(diff > 0){
-            $("#overload").html('<p style=\"color: #ff7b25\">' + nFormat.format(diff) + '</p>');
-        } else {
-            $("#overload").html('<p style=\"color: #45b39d\">no overload</p>');
-        }
+    var inputDays = parseInt($('#days').val());
+    if(isNaN(inputDays) || (inputDays == 0)){
+        inputDays = 1;
     }
+    if( inputDays != days){
+        days = inputDays;
+        localStorage.setItem('dgstNumberOfDays', days);
+    }
+
+    var instances = JSON.parse(localStorage.getItem("dgstNumberOfInstances") || "3");
+    var inputInstances = parseInt($('#instances').val());
+    if(isNaN(inputInstances) || (inputInstances == 0)){
+        inputDays = 3;
+    }
+    if( inputInstances != instances){
+        instances = inputInstances;
+        localStorage.setItem('dgstNumberOfInstances', instances);
+    }
+
+    var memory = JSON.parse(localStorage.getItem("dgstContainerMemory") || "2");
+    if( $("#ram").val() != memory){
+        memory = $("#ram").val();
+        localStorage.setItem('dgstContainerMemory', memory);
+    }
+    analyse();
 };
 
 function displayEviction() {
@@ -106,10 +125,16 @@ function addCacheCountToTable(cache, ndx) {
     var rowContent = '<tr>';
     rowContent += '<td>' + cache.name + '</td>';
     rowContent += '<td class=\"text-end\">' + nFormat.format(cache.entries) + '</td>';
-    rowContent += '<td class=\"text-end\"><div class=\"input-group input-group-sm\"><span class=\"input-group-text\">Size in Mil.</span><input type=\"text\" class=\"form-control input_max_count\" value=\"' + cache.maxcount + '\"></div></td>';
+    rowContent += '<td class=\"text-end\"><select class=\"form-select form-select-sm\" id=\"misure\"><option value=\"1073741824\">GB</option><option value=\"1048576\">MB</option><option value=\"1024\">KB</option><option value=\"1\">B</option></select></td>';
+    //rowContent += '<td class=\"text-end\"><div class=\"input-group input-group-sm\"><span class=\"input-group-text\">Size in Mil.</span><input type=\"text\" class=\"form-control input_max_count\" value=\"' + cache.maxcount + '\"></div></td>';
+    rowContent += '<td class=\"text-end\"><input type=\"text\" class=\"form-control input_max_count input-sm\" value=\"' + cache.maxcount + '\"></td>';
 
-    rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + cache.owners + '</td>';
-    rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">' + cache.owners + '</td>';
+    var days = JSON.parse(localStorage.getItem("dgstNumberOfDays") || "1");
+    var dss = nFormat.format((cache.entrySize + cache.keySize) * cache.entries * days * (cache.owners + 1));
+    rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + dss + '</td>';
+
+    var calculatedDays = cache.maxcount / cache.entries;
+    rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">' + calculatedDays + '</td>';
     rowContent += '</tr>';
     $('#tbl_caches  tbody').append(rowContent);
 };
