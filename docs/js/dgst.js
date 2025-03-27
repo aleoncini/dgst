@@ -136,8 +136,8 @@ function addCacheCountToTable(cache, ndx) {
     } else {
         var dss = nFormat.format((cache.entrySize + cache.keySize) * cache.maxcount * (cache.owners + 1));
         rowContent += '<td id=\"dss_' + cache.name + '\" class=\"text-end\">' + dss + '</td>';
-        rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">0</td>';
-        var daysInMemory = cache.maxcount / cache.entries;
+        var dim = dFormat.format(cache.maxcount / cache.entries);
+        rowContent += '<td id=\"dim_' + cache.name + '\" class=\"text-end\">' + dim + '</td>';
     }
     rowContent += '</tr>';
     $('#tbl_caches  tbody').append(rowContent);
