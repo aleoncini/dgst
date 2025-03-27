@@ -75,7 +75,7 @@ function analyse() {
     var instMemory = clSize / instances;
     $("#inst_mem").html(nFormat.format(instMemory));
 
-    var diff = (instMemory * 2) - parseInt($('#ram').val()) * 1024 * 1024 *1024;
+    var diff = instMemory - (parseInt($('#ram').val()) - 1) * 1024 * 1024 *1024;
     if(diff > 0){
         $("#overload").html('<p style=\"color: #ff7b25\">' + nFormat.format(diff) + '</p>');
     } else {
