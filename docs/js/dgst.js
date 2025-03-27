@@ -39,6 +39,12 @@ function setAlert(msg) {
 function resetReport() {
     var caches = [];
     localStorage.setItem('dgstCaches', JSON.stringify(caches));
+
+    localStorage.setItem('dgstDataSetSize', 0);
+    localStorage.setItem('dgstNumberOfDays', 1);
+    localStorage.setItem('dgstNumberOfInstances', 3);
+    localStorage.setItem('dgstContainerMemory', 2);
+
     displayCaches();
 };
 
