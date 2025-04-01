@@ -34,20 +34,35 @@
 </head>
 
 <body style="padding-top: 3.5rem">
+
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-
-
     <div class="container-fluid">
         <a class="navbar-brand" href="#"><img src="img/transparent_spacer.png" width="50" height="32"><img src="img/logo.svg" width="135" height="32"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-                <a class="nav-link" href="analysis.html">Analysis</a>
-                <a class="nav-link" href="eviction.html">Eviction</a>
-            </div>
+
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="analysis.html">Analysis</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="eviction.html">Eviction</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Utils
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportCaches();">Export</a></li>
+                        <li><a class="dropdown-item" href="import.html">Import</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
@@ -161,7 +176,7 @@
 
 <!-- jQuery first, then Bootstrap JS -->
 <script src="js/jquery-3.7.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
 <script src="js/dgst.js"></script>
 <script type="text/javascript">
 

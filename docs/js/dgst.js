@@ -189,3 +189,17 @@ function calculateClusterSizeByMaxCount() {
     }
 
 };
+
+function exportCaches() {
+  var element = document.createElement('a');
+  var content = localStorage.getItem("dgstCaches");
+  element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(content));
+  element.setAttribute('download', 'caches.json');
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+};
+
+function importCaches(caches) {
+}
